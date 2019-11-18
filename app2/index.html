@@ -15,6 +15,30 @@
       border-collapse: collapse;
 
     }
+    #modal{
+      display: none;
+      width: 100%;
+      height: 100vh;
+      position: absolute;
+      background-color: rgba(200, 200, 200, 0.7);
+      z-index: 90;
+      top: 0;
+      left: 0;
+    }
+    #delete{
+      background-color: white;
+      width: 300px;
+      height: 200px;
+      position: absolute;
+      left: calc( 50vw - 150px);
+      top: calc( 50vh - 150px);
+      box-shadow: 0 0 5px black;
+      text-align: center;
+      padding: 20px;
+    }
+    #delete .msg{
+      margin: 10px;
+    }
     </style>
     <script
     src="https://code.jquery.com/jquery-3.4.1.min.js"
@@ -27,7 +51,7 @@
 </head>
 <body>
   <h1 class="header">學生資料管理系統</h1>
-  <button>新增學生資料</button>
+  <button id="addData">新增學生資料</button>
   <select name="class" id="class">
     <option value="1">一年一班</option>
     <option value="2">一年二班</option>
@@ -40,7 +64,17 @@
     <option value="9">一年九班</option>
     <option value="10">一年十班</option>
   </select>
-  <table>
+  
+    <div id="modal">
+      <div id="delete">
+        <div class="msg">確定要刪除嗎?</div>
+        <div id="btn">
+          <button id="delBtn" >確認刪除</button>
+          <button id="delCancel">取消</button>
+        </div>
+      </div>
+    </div>
+    <table>
     <tr>
       <td>座號</td>
       <td>姓名</td>
@@ -62,6 +96,17 @@
 ************************************/
 
 
+$("#delCancel").on("click", function(){
+  $("#modal").hide();
+  $("body").css("overflow", "auto");
+})
+
+$("#delBtn").on("click",function(){
+  let user = $(this).attr("data-uid");
+  console.log(user);
+  del(user);
+  $("#modal").hide();
+})
 //新增資料的函式
 function create(){
 
@@ -76,7 +121,26 @@ $("#class").on("change", function(){
 function query(cl){
   $.get("./api/query.php", {"class":cl},function(res){
     console.log(res);
-    $("table").html(res)
+    $("table").html(res);
+    // 傾聽事件
+    $(".del-user").on("click", function(){
+      let user = $(this).data("del");
+      console.log( user);
+
+      // 調整彈出視窗位置
+      // let boxAlign = ($(window).height()-$("#delete").height())/2+$(document).scrollTop();
+      // console.log(boxAlign);
+      $("#modal").css("top", $(document).scrollTop());
+      // del(user);
+      // 原生寫法
+      // document.getElementById("modal").style.display="block";
+      $("#delBtn").attr("data-uid",user);
+      // $("#modal").hide() 隱藏
+      $("#modal").show();
+      // 隱藏滾輪 
+      $("body").css("overflow", "hidden");
+  
+    })
   })
 }
 
@@ -86,8 +150,14 @@ function update(){
 }
 
 //刪除資料的函式
-function del(){
-
+function del(id){
+  $.post("./api/delete.php",{id},function(res){
+    console.log(res);
+    // 重整頁面
+    let cl = $("#class").val();
+    query(cl);
+    $("html").css("overflow", "auto");
+  })
 }
 
 </script>

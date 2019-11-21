@@ -21,6 +21,7 @@ foreach($row as $r){
     
     echo "</tr>";
 
+    // echo 可以當作回傳值得方式
 
 }
 ?>
